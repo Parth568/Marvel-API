@@ -29,7 +29,7 @@ CREATE POLICY "Authenticated users can read characters"
 --   USING (true);
 
 -- ============================================================
--- 4. Only service_role can insert / update / delete
+-- 4. Only service_role can insert / update / delete1
 --    (your Express backend uses the service key, so it bypasses RLS)
 -- ============================================================
 CREATE POLICY "Service role can insert characters"
