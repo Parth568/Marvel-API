@@ -1,0 +1,25 @@
+{
+  "name": "marvel-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "concurrently -n api,web -c blue,magenta \"npm:dev:api\" \"npm:dev:vite\"",
+    "dev:api": "node --watch server.js",
+    "dev:vite": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "seed:check": "node seed/seedCharacters.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "vite": "^8.0.10"
+  }
+}
