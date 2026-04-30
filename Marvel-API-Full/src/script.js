@@ -1,4 +1,9 @@
-import { getSession, signOut } from "./supabase.js";
+import {
+  getSession,
+  signOut,
+  autocompleteCharacters,
+  searchCharacters,
+} from "./supabase.js";
 
 // ─── Auth check ───────────────────────────────────────────────
 const { session } = await getSession();
@@ -6,36 +11,13 @@ const authGate = document.getElementById("auth-gate");
 const app = document.getElementById("app");
 
 if (!session) {
-  // Show login/register gate, hide app
   authGate.style.display = "block";
   app.style.display = "none";
 } else {
-  //   // Hide gate, show app
   authGate.style.display = "none";
   app.style.display = "block";
   initApp(session);
 }
-
-// Attach the user's Supabase JWT to API calls so requireAuth accepts them.
-async function authFetch(url, options = {}) {
-  const { session } = await getSession();
-  const headers = new Headers(options.headers || {});
-  if (session?.access_token) {
-    headers.set("Authorization", `Bearer ${session.access_token}`);
-  }
-  return fetch(url, { ...options, headers });
-}
-
-/* ---- Skipping auth ---- */
-// import { signOut } from "./supabase.js";
-
-// const authGate = document.getElementById("auth-gate");
-// const app = document.getElementById("app");
-
-// // TEMP: skip auth
-// authGate.style.display = "none";
-// app.style.display = "block";
-// initApp();
 
 // ─── Logout ───────────────────────────────────────────────────
 document.getElementById("logout-btn").addEventListener("click", async () => {
@@ -46,7 +28,6 @@ document.getElementById("logout-btn").addEventListener("click", async () => {
 
 // ─── Main app logic ───────────────────────────────────────────
 function initApp(session) {
-  const API_BASE = "/api/characters";
   const input = document.getElementById("input-box");
   const button = document.getElementById("submit-button");
   const showContainer = document.getElementById("show-container");
@@ -64,13 +45,9 @@ function initApp(session) {
     if (input.value.length < 4) return;
 
     try {
-      const response = await authFetch(
-        `${API_BASE}/autocomplete?prefix=${encodeURIComponent(input.value)}`,
-      );
-      const jsonData = await response.json();
-      if (!jsonData.success || !jsonData.data) return;
+      const characters = await autocompleteCharacters(input.value);
 
-      jsonData.data.forEach((result) => {
+      characters.forEach((result) => {
         let name = result.name;
         let div = document.createElement("div");
         div.style.cursor = "pointer";
@@ -98,17 +75,14 @@ function initApp(session) {
     showContainer.innerHTML = "";
 
     try {
-      const response = await authFetch(
-        `${API_BASE}/search?name=${encodeURIComponent(input.value)}`,
-      );
-      const jsonData = await response.json();
+      const characters = await searchCharacters(input.value);
 
-      if (!jsonData.success || !jsonData.data || jsonData.data.length === 0) {
+      if (!characters || characters.length === 0) {
         showContainer.innerHTML = `<p style="color:#a0a0a6; text-align:center;">No character found for "${input.value}"</p>`;
         return;
       }
 
-      const element = jsonData.data[0];
+      const element = characters[0];
       showContainer.innerHTML = `<div class="card-container">
         <div class="container-character-image">
         <img src="${element.thumbnail_url}"/></div>

@@ -42,3 +42,25 @@ export async function updateUser(newPassword) {
   const { data, error } = await supabase.auth.updateUser({ password: newPassword });
   return { data, error };
 }
+
+export async function autocompleteCharacters(prefix) {
+  const { data, error } = await supabase
+    .from('characters')
+    .select('name')
+    .ilike('name', `${prefix}%`)
+    .order('name')
+    .limit(10);
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function searchCharacters(name) {
+  const { data, error } = await supabase
+    .from('characters')
+    .select('*')
+    .ilike('name', `%${name}%`)
+    .order('name')
+    .limit(10);
+  if (error) throw new Error(error.message);
+  return data;
+}
